@@ -28,7 +28,7 @@ imgTitle.onload = () => {
 };
 
 // --- 2. Variablen ---
-const gravity = 0.95, levelWidth = 24000; // Erhöht für einen knackigen, hohen Bogen
+const gravity = 0.95, levelWidth = 24000; 
 let lives = 3, gameOver = false, gameWon = false, gameStarted = false;
 let fireworks = [], fireworkTimer = 0, showWinMessage = false;
 let hitFlashTimer = 0;
@@ -49,10 +49,23 @@ function createExplosion(x, y) {
     }
 }
 
+// Start-Funktion mit integriertem Fullscreen-Trigger
 function startGame() {
     gameStarted = true;
     document.getElementById("startScreen").style.display = "none";
     bgMusic.play().catch(error => console.log("Audio-Fehler:", error));
+
+    // AKTIVIERUNG DES ECHTEN VOLLBILDMODUS (Blendet Tabs aus)
+    let container = document.getElementById("gameContainer");
+    if (container.requestFullscreen) {
+        container.requestFullscreen();
+    } else if (container.mozRequestFullScreen) { // Firefox
+        container.mozRequestFullScreen();
+    } else if (container.webkitRequestFullscreen) { // Chrome / Safari
+        container.webkitRequestFullscreen();
+    } else if (container.msRequestFullscreen) { // IE/Edge
+        container.msRequestFullscreen();
+    }
 }
 
 function handlePlayerHit(enemyIndex) {
@@ -76,7 +89,6 @@ function handlePlayerHit(enemyIndex) {
     }
 }
 
-// --- 3. Update-Logik ---
 function update() {
     if (!gameStarted || gameOver || showWinMessage) return;
 
@@ -153,7 +165,7 @@ function update() {
         if (enemy.x <= enemy.minX || enemy.x + enemy.width >= enemy.maxX) enemy.vx *= -1;
 
         if (checkCollision(player, enemy) && player.vy > 0 && (player.y + player.height - player.vy) <= enemy.y + 25) {
-            enemy.active = false; player.vy = -16; // Erhöhtes Abfedern nach Gegner-Kill
+            enemy.active = false; player.vy = -16; 
         } else if (checkFairEnemyCollision(player, enemy)) {
             handlePlayerHit(i);
         }
