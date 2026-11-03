@@ -3,22 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Mein KI Autoscroller</title>
+    <title>Pottgarten Game</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pottgarten">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Pottgarten%20Game%22,%22short_name%22:%22Pottgarten%22,%22start_url%22:%22index.html%22,%22display%22:%22fullscreen%22,%22orientation%22:%22landscape%22,%22background_color%22:%22%23222222%22}">
+
     <style>
-        /* Schaltet Scrollbalken auf dem Handy komplett aus */
+        /* Verhindert jegliche Textmarkierung und Menüs auf dem gesamten Bildschirm */
+        *, *::before, *::after {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #222; overflow: hidden; display: flex; justify-content: center; align-items: center; font-family: sans-serif; color: white; }
         
-        /* Der Container passt sich dynamisch dem Handy-Bildschirm an */
+        /* Auf 16:9 Breitbild angepasst, füllt den Bildschirm optimal aus */
         #gameContainer { 
             position: relative; 
             width: 100vw; 
-            height: 75vw; /* Behält das 4:3 Verhältnis bei (800x600) */
-            max-width: 133.33vh; 
+            height: 56.25vw; 
+            max-width: 177.78vh; 
             max-height: 100vh;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
         }
         
-        /* Das Canvas füllt den Container zu 100% aus */
         canvas { width: 100%; height: 100%; display: block; background: #87CEEB; }
         
         #uiOverlay { position: absolute; top: 20px; left: 20px; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); z-index: 10; display: flex; gap: 30px; }
@@ -26,16 +41,20 @@
         .screen button { margin-top: 25px; padding: 12px 24px; font-size: 20px; cursor: pointer; border: none; background: #28a745; color: white; border-radius: 5px; }
         #winScreen { text-align: center; padding: 40px; box-sizing: border-box; }
         
-        /* Titelbildschirm füllt ebenfalls den Container */
         #startScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #333; z-index: 30; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; background-size: cover; background-position: center; }
-        #startText { position: absolute; bottom: 15%; font-size: 24px; background: rgba(0,0,0,0.7); padding: 12px 24px; border-radius: 10px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
+        #startText { position: absolute; bottom: 15%; font-size: 22px; background: rgba(0,0,0,0.85); padding: 15px 30px; border-radius: 10px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; line-height: 1.4; border: 2px solid #ffc107; }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
     <div id="startScreen" onclick="startGame()">
-        <div id="startText">Tippe zum Starten<br><span style="font-size: 14px; color: #ffc107;">(Wechselt in den Vollbildmodus)</span></div>
+        <div id="startText">
+            Tippe zum Starten<br>
+            <span style="font-size: 13px; color: #ffc107; text-transform: none; font-weight: normal; letter-spacing: 0;">
+                Tipp: Für echtes Vollbild ohne Tabs, füge diese Seite<br>über das Browser-Menü zum Home-Bildschirm hinzu!
+            </span>
+        </div>
     </div>
 
     <div id="uiOverlay">
@@ -56,8 +75,8 @@
         <button onclick="resetGame()">Nochmal spielen</button>
     </div>
 
-    <!-- Das Canvas bleibt intern bei 800x600 für die Logik, skaliert aber via CSS -->
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <!-- Interne Breite auf 1066 erhöht für echtes 16:9 Widescreen -->
+    <canvas id="gameCanvas" width="1066" height="600"></canvas>
 </div>
 
 <script src="level.js"></script>

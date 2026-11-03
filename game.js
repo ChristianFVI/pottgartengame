@@ -1,7 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// --- 1. Grafiken & Audio laden ---
 const imgBackground = new Image(); imgBackground.src = 'hintergrund.png';
 const imgPlayer = new Image();      imgPlayer.src = 'spieler.png';
 const imgPlatform = new Image();    imgPlatform.src = 'plattform.png';
@@ -10,8 +9,7 @@ const imgBuilding = new Image();    imgBuilding.src = 'gebaeude.png';
 const imgTitle = new Image();       imgTitle.src = 'titel.png';
 
 const bgMusic = new Audio('musik.mp3');
-bgMusic.loop = true;
-bgMusic.volume = 0.5;
+bgMusic.loop = true; bgMusic.volume = 0.5;
 
 const hitSound = new Audio('treffer.mp3');
 hitSound.volume = 0.6;
@@ -27,8 +25,7 @@ imgTitle.onload = () => {
     document.getElementById("startScreen").style.backgroundImage = "url('titel.png')";
 };
 
-// --- 2. Variablen ---
-const gravity = 0.95, levelWidth = 24000; 
+const gravity = 0.8, levelWidth = 24000; 
 let lives = 3, gameOver = false, gameWon = false, gameStarted = false;
 let fireworks = [], fireworkTimer = 0, showWinMessage = false;
 let hitFlashTimer = 0;
@@ -49,43 +46,25 @@ function createExplosion(x, y) {
     }
 }
 
-// Start-Funktion mit integriertem Fullscreen-Trigger
 function startGame() {
     gameStarted = true;
     document.getElementById("startScreen").style.display = "none";
     bgMusic.play().catch(error => console.log("Audio-Fehler:", error));
-
-    // AKTIVIERUNG DES ECHTEN VOLLBILDMODUS (Blendet Tabs aus)
-    let container = document.getElementById("gameContainer");
-    if (container.requestFullscreen) {
-        container.requestFullscreen();
-    } else if (container.mozRequestFullScreen) { // Firefox
-        container.mozRequestFullScreen();
-    } else if (container.webkitRequestFullscreen) { // Chrome / Safari
-        container.webkitRequestFullscreen();
-    } else if (container.msRequestFullscreen) { // IE/Edge
-        container.msRequestFullscreen();
-    }
 }
 
 function handlePlayerHit(enemyIndex) {
-    lives--;
-    updateUI();
+    lives--; updateUI();
     hitSound.currentTime = 0;
     hitSound.play().catch(error => console.log("Sound-Fehler:", error));
     hitFlashTimer = 20;
 
-    if (enemyIndex !== undefined && enemyIndex !== null) {
-        enemies[enemyIndex].active = false;
-    }
+    if (enemyIndex !== undefined && enemyIndex !== null) enemies[enemyIndex].active = false;
 
     if (lives <= 0) {
-        gameOver = true;
-        bgMusic.pause();
+        gameOver = true; bgMusic.pause();
         document.getElementById("gameOverScreen").style.display = "flex";
     } else {
-        player.y = player.startY;
-        player.vy = 0;
+        player.y = player.startY; player.vy = 0;
     }
 }
 
@@ -119,16 +98,12 @@ function update() {
         player.x += currentScrollSpeed;
     }
 
-    player.vy += gravity;
-    player.y += player.vy;
-
+    player.vy += gravity; player.y += player.vy;
     player.grounded = false;
 
     if (checkCollision(player, mainFloor)) {
         if (player.vy > 0 && (player.y + player.height - player.vy) <= mainFloor.y + 4) {
-            player.y = mainFloor.y - player.height;
-            player.vy = 0;
-            player.grounded = true;
+            player.y = mainFloor.y - player.height; player.vy = 0; player.grounded = true;
         }
     }
     
@@ -136,14 +111,10 @@ function update() {
         let plat = platforms[i];
         if (checkCollision(player, plat)) {
             if (player.vy >= 0 && (player.y + player.height - player.vy) <= plat.y + 6) {
-                player.y = plat.y - player.height; 
-                player.vy = 0; 
-                player.grounded = true;
+                player.y = plat.y - player.height; player.vy = 0; player.grounded = true;
             } 
             else if (player.vy < 0 && (player.y - player.vy) >= (plat.y + plat.height - 6)) {
-                player.y = plat.y + plat.height; 
-                player.vy = 0.5; 
-                
+                player.y = plat.y + plat.height; player.vy = 0.5; 
                 for (let enemy of enemies) {
                     if (enemy.active) {
                         let enemyXCenter = enemy.x + enemy.width / 2;
@@ -152,8 +123,7 @@ function update() {
                         }
                     }
                 }
-                platforms.splice(i, 1); 
-                break; 
+                platforms.splice(i, 1); break; 
             }
         }
     }
@@ -165,15 +135,14 @@ function update() {
         if (enemy.x <= enemy.minX || enemy.x + enemy.width >= enemy.maxX) enemy.vx *= -1;
 
         if (checkCollision(player, enemy) && player.vy > 0 && (player.y + player.height - player.vy) <= enemy.y + 25) {
-            enemy.active = false; player.vy = -16; 
+            enemy.active = false; player.vy = -16;
         } else if (checkFairEnemyCollision(player, enemy)) {
             handlePlayerHit(i);
         }
     }
 
     if (checkCollision(player, building) || player.x >= building.x) {
-        gameWon = true; 
-        bgMusic.pause();
+        gameWon = true; bgMusic.pause();
         createExplosion(building.x + building.width / 2, building.y + 100);
     }
 }
@@ -187,60 +156,45 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (imagesLoaded.bg) {
-        let bgW = 800; 
+        let bgW = 1066; // Auf die neue Widescreen Breite angepasst
         let bgOffset = Math.floor(camera.x * 0.3) % bgW;
         for (let i = -bgW; i < canvas.width + bgW; i += bgW) {
             ctx.drawImage(imgBackground, i - bgOffset, 0, bgW, canvas.height);
         }
     }
     
-    if (camera.x > 21500) {
-        let alpha = Math.min(1, (camera.x - 21500) / 1500);
+    if (camera.x > (levelWidth - canvas.width - 1500)) {
+        let alpha = Math.min(1, (camera.x - (levelWidth - canvas.width - 1500)) / 1500);
         ctx.fillStyle = "rgba(0, 0, 0, " + alpha + ")";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     ctx.save(); ctx.translate(-camera.x, -camera.y);
+    ctx.strokeStyle = "#000000"; ctx.lineWidth = 4;
 
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 4;
-
-    if (imagesLoaded.building) {
-        ctx.drawImage(imgBuilding, building.x, building.y, building.width, building.height);
-    } else {
-        ctx.fillStyle = "#ffd700"; ctx.fillRect(building.x, building.y, building.width, building.height);
-    }
+    if (imagesLoaded.building) ctx.drawImage(imgBuilding, building.x, building.y, building.width, building.height);
+    else ctx.fillStyle = "#ffd700"; ctx.fillRect(building.x, building.y, building.width, building.height);
     ctx.strokeRect(building.x, building.y, building.width, building.height);
 
-    ctx.fillStyle = "#555";
-    ctx.fillRect(mainFloor.x, mainFloor.y, mainFloor.width, mainFloor.height);
+    ctx.fillStyle = "#555"; ctx.fillRect(mainFloor.x, mainFloor.y, mainFloor.width, mainFloor.height);
     ctx.strokeRect(mainFloor.x, mainFloor.y, mainFloor.width, mainFloor.height);
 
     for (let plat of platforms) {
-        if (imagesLoaded.platform) {
-            ctx.drawImage(imgPlatform, plat.x, plat.y, plat.width, plat.height);
-        } else {
-            ctx.fillStyle = "#777"; ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        }
+        if (imagesLoaded.platform) ctx.drawImage(imgPlatform, plat.x, plat.y, plat.width, plat.height);
+        else { ctx.fillStyle = "#777"; ctx.fillRect(plat.x, plat.y, plat.width, plat.height); }
         ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
     }
 
     for (let enemy of enemies) {
         if (!enemy.active) continue;
-        if (imagesLoaded.enemy) {
-            ctx.drawImage(imgEnemy, enemy.x, enemy.y, enemy.width, enemy.height);
-        } else {
-            ctx.fillStyle = "#FF4d4d"; ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        }
+        if (imagesLoaded.enemy) ctx.drawImage(imgEnemy, enemy.x, enemy.y, enemy.width, enemy.height);
+        else { ctx.fillStyle = "#FF4d4d"; ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height); }
         ctx.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);
     }
 
     if (!gameWon || fireworkTimer < 180) {
-        if (imagesLoaded.player) {
-            ctx.drawImage(imgPlayer, player.x, player.y, player.width, player.height);
-        } else {
-            ctx.fillStyle = "#007bff"; ctx.fillRect(player.x, player.y, player.width, player.height);
-        }
+        if (imagesLoaded.player) ctx.drawImage(imgPlayer, player.x, player.y, player.width, player.height);
+        else { ctx.fillStyle = "#007bff"; ctx.fillRect(player.x, player.y, player.width, player.height); }
     }
 
     fireworks.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fillRect(p.x, p.y, p.size, p.size); });
@@ -252,9 +206,6 @@ function draw() {
     }
 }
 
-function resetGame() {
-    location.reload();
-}
-
+function resetGame() { location.reload(); }
 function loop() { update(); draw(); requestAnimationFrame(loop); }
 loop(); updateUI();
