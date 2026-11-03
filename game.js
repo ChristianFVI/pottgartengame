@@ -1,6 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// --- 1. Grafiken & Audio laden ---
 const imgBackground = new Image(); imgBackground.src = 'hintergrund.png';
 const imgPlayer = new Image();      imgPlayer.src = 'spieler.png';
 const imgPlatform = new Image();    imgPlatform.src = 'plattform.png';
@@ -101,6 +102,9 @@ function update() {
     player.vy += gravity; player.y += player.vy;
     player.grounded = false;
 
+    // Distanz-Meldung bei jeder Bewegung aktualisieren
+    updateUI();
+
     if (checkCollision(player, mainFloor)) {
         if (player.vy > 0 && (player.y + player.height - player.vy) <= mainFloor.y + 4) {
             player.y = mainFloor.y - player.height; player.vy = 0; player.grounded = true;
@@ -148,15 +152,24 @@ function update() {
 }
 
 function updateUI() {
+    // 1. Herzen aktualisieren
     let hearts = ""; for(let i=0; i<lives; i++) hearts += "❤️";
     document.getElementById("livesBoard").innerText = "Leben: " + (hearts || "💀");
+
+    // 2. Verbleibende Meter berechnen (Abstand zum Gebäude)
+    // 11500 Pixel (bis Gebäude-Start) minus Startposition des Spielers (150) = 11350 Pixel Netto-Distanz.
+    // 11350 Pixel dividiert durch 63 ergibt ziemlich genau 180 Meter.
+    let distanceInPixels = Math.max(0, building.x - player.x);
+    let distanceInMeters = Math.floor(distanceInPixels / 63);
+    
+    document.getElementById("distanceBoard").innerText = "Noch: " + distanceInMeters + "m";
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (imagesLoaded.bg) {
-        let bgW = 1066; // Auf die neue Widescreen Breite angepasst
+        let bgW = 1066; 
         let bgOffset = Math.floor(camera.x * 0.3) % bgW;
         for (let i = -bgW; i < canvas.width + bgW; i += bgW) {
             ctx.drawImage(imgBackground, i - bgOffset, 0, bgW, canvas.height);
