@@ -3,18 +3,20 @@ const player = {
     x: 150, y: 350, 
     width: 100, height: 100, 
     vx: 0, vy: 0, 
-    jumpForce: 17.5, // Leicht angepasst für die neue Widescreen-Physik
+    jumpForce: 17.5, 
     grounded: false 
 };
 
 window.addEventListener("keydown", (e) => {
-    if (gameOver || showWinMessage) return;
+    if (!gameStarted || gameOver || showWinMessage) return;
     if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") triggerJump();
 });
 
-// e.preventDefault() stoppt das Handy-Kopier-Menü und die Lupe komplett
 window.addEventListener("touchstart", (e) => {
-    if (gameOver || showWinMessage) return;
+    // Wenn das Spiel noch nicht läuft, lassen wir das Event durchgehen (wichtig für den Startknopf!)
+    if (!gameStarted || gameOver || showWinMessage) return;
+    
+    // Verhindert das Kopier-Menü des Handys, ignoriert aber Buttons
     if (e.target.tagName !== "BUTTON") {
         e.preventDefault(); 
         triggerJump();
@@ -22,7 +24,8 @@ window.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 window.addEventListener("mousedown", (e) => {
-    if (e.target.tagName !== "BUTTON" && !gameOver && !showWinMessage) {
+    if (!gameStarted || gameOver || showWinMessage) return;
+    if (e.target.tagName !== "BUTTON") {
         e.preventDefault();
         triggerJump();
     }
